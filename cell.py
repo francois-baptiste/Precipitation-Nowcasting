@@ -22,16 +22,16 @@ class ConvLSTMCell(nn.Module):
   def forward(self, x, state):
 
     _hidden, _cell = state
-    # print(x.shape,_hidden.shape)
+#     print(x.shape,_hidden.shape)
     cat_x = torch.cat([x, _hidden], dim=1) 
     Conv_x = self._conv(cat_x)
       
     i, f, o, j = torch.chunk(Conv_x, 4, dim = 1)
 
-    i = func.sigmoid(i)
-    f = func.sigmoid(f)
-    cell = _cell * f + i * func.tanh(j)
-    o =func.sigmoid(o)
-    hidden = o * func.tanh(cell)
+    i = F.sigmoid(i)
+    f = F.sigmoid(f)
+    cell = _cell * f + i * F.tanh(j)
+    o =F.sigmoid(o)
+    hidden = o * F.tanh(cell)
 
     return hidden, cell

@@ -15,8 +15,9 @@ import numpy as np
 import torch
 from torch import nn
 from torch.autograd import Variable
-from torch.nn import functional as func
+from torch.nn import functional as F
 from torch.utils.data import DataLoader
+import h5py
 import argparse
 
 
@@ -41,15 +42,23 @@ args.add_argument('--model_dir',
                   help = "dir where models are saved")
 args.add_argument('--trainset_name',
                   type = str,
-                  default = 'trainset',
+                  default = 'train',
                   help = "the training set where the training is conducted")
 args.add_argument('--testset_name',
                   type = str,
-                  default = 'testset',
+                  default = 'test',
                   help = "the test set where the test is conducted")
 args.add_argument('--seq_length',
                   type = int,
                   default = 15,
+                  help = "length of the sequence")
+args.add_argument('--width_size',
+                  type = int,
+                  default = 158,
+                  help = "length of the sequence")
+args.add_argument('--height_size',
+                  type = int,
+                  default = 238,
                   help = "length of the sequence")
 args.add_argument('--img_size',
                   type = int,
@@ -113,6 +122,56 @@ def initcircle(shape,r,batch,num):
     
     return output2
 
+class Ucsd_loader():
+    def __init__(self, img_dir, target_dir, num_frames):
+        
+        self.data_list = []
+        for root, dir, files in os.walk(img_dir):
+            for file in files:
+                if file.find('.png')!= -1:
+                    self.data_list.append(os.path.join(root, file))
+        self.data_list.sort()
+        
+        self.gt_list = []
+        for root, dir, files in os.walk(target_dir):
+            for file in files:
+                if file.find('.h5')!= -1:
+                    self.gt_list.append(os.path.join(root, file))
+        self.gt_list.sort()
+
+        self.seq_length = num_frames
+        
+        self.all_dlist = []
+        self.all_glist = []
+  
+        for i in range(len(self.data_list) - (self.seq_length - 1)):
+            self.all_dlist.append(self.data_list[i:i+self.seq_length])
+           
+            self.all_glist.append(self.gt_list[i:i+self.seq_length])
+
+        print("size of the data: ", len(self.all_dlist), len(self.all_glist))
+
+    def __getitem__(self, index):
+        data = []
+        label = []
+
+        for i in range(len(self.all_glist[index])):
+            gt_file = h5py.File(self.all_glist[index][i],'r')
+            labeli = np.float32(np.asarray(gt_file['density']))
+            labeli = Image.fromarray(labeli).resize((args.img_size,args.img_size),Image.BILINEAR)
+            label.append(np.asarray(labeli))
+            
+
+            datai = Image.open(self.all_dlist[index][i]).resize((args.img_size, args.img_size),Image.BILINEAR)
+            datai = np.asarray(datai)
+            data.append(datai)
+        
+        data = np.float32(data)
+        label = np.float32(label)
+        return data, label
+
+    def __len__(self):
+        return len(self.all_dlist)
 
 
 class Dataloader0():
@@ -145,7 +204,10 @@ class Dataloader0():
             a_unix = int(a_UTC.timestamp)
             b_UTC = arrow.get(b_UTC,'MMDDHHmm')
             b_unix = int(b_UTC.timestamp)
-
+            
+            # just checking whether the given image is within the same day & sequential
+            # 6 * 60 because the image was taken every 6 minutes (6 * 60)
+            # for this case, we just want to change the if case using scene/frame based 
             if b_unix - a_unix > (self.seq_length-2)*6*60 and b_unix - a_unix < self.seq_length*6*60:
                 self.all_list.append(self.data_list[i:i+self.seq_length])
 

@@ -7,9 +7,9 @@ Created on Thu Sep 21 16:15:53 2017
 """
 
 from util import *
-from cell import ConvLSTMCell
 import util
-from model import ConvLSTM
+from convlstm import CLSTM
+import convlstm
 
 def run_training(args,reload=False):     
 
@@ -30,15 +30,14 @@ def run_training(args,reload=False):
     else:
         print('Initiating new model')
         
-        model = ConvLSTM()
+        model = CLSTM((args.img_size, args.img_size), 1, 5, (64,64), 2)
+        model.apply(convlstm.weight_init)
         model = model.cuda()
         start = 0
 
     torch.manual_seed(1)
-    summary = open(args.logs_train_dir+"5_10_2ly.txt","w") ## you can change the name of your summary. 
     self_built_dataset = util.Ucsd_loader(args.data_dir+args.trainset_name, args.data_dir+'train_gt/',
                                           args.seq_length)
-#     self_built_dataset = util.Dataloader0(args.data_dir+args.trainset_name, args.seq_start, args.seq_length-args.seq_start)
     trainloader = DataLoader(
         self_built_dataset,
         batch_size=args.batch_size,
@@ -46,7 +45,6 @@ def run_training(args,reload=False):
         num_workers=4,
         drop_last = True)
 
-#     criterion = nn.L1Loss()
     criterion = nn.MSELoss(size_average=False)
     optimizer = torch.optim.Adam(model.parameters(),lr=args.lr,weight_decay=args.wd)
     loss_ave = 0
@@ -56,7 +54,6 @@ def run_training(args,reload=False):
 
         print("--------------------------------------------")
         print("EPOCH:",epoch)
-        t = time.time()
         step = 0
         for iteration, data in enumerate(trainloader,0):
             loss = 0
@@ -66,24 +63,12 @@ def run_training(args,reload=False):
             X = Variable(X).cuda()
             Y = Variable(Y).cuda()
             
-            mse = 0
-            mae = 0
+            hidden_state = model.init_hidden(args.batch_size)
 
-            output_list = model(X)
+            output_list = model(X, hidden_state)
             optimizer.zero_grad()         
 
             for i in range(args.seq_length):
-#                 targetY = Y[0][i].data.cpu().numpy()
-
-#                 A = output_list[i][0,0,:,:].data.cpu().numpy()
-
-#                 gt_cnt = np.sum(targetY)
-#                 pre_cnt = np.sum(A)
-#                 mae += abs(np.sum(targetY) - np.sum(A))
-#                 mse += (np.sum(targetY) - np.sum(A)) ** 2
-
-#                 print('Gt cnt: %f, Pred cnt: %f' % (gt_cnt, pre_cnt))
-                print(output_list[i].size(0))
                 target = Y[:,i,:,:]
                 loss += criterion(output_list[i].reshape(target.shape), target)
             

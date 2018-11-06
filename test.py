@@ -15,11 +15,9 @@ def test(idx,model,reload=False):
         model = restore_net(idx)
         model.eval()
 ### loading validation dataset
-    self_built_dataset = util.Dataloader0(args.data_dir+args.testset_name,
-                                          args.seq_start,
-                                          args.seq_length-args.seq_start,
-                                          rot=False)
-    name_list = self_built_dataset.all_list  
+    self_built_dataset = util.Ucsd_loader(args.data_dir+args.testset_name,
+                                          args.data_dir+'test_gt',
+                                          args.seq_length)
     trainloader = DataLoader(
         self_built_dataset,
         batch_size=args.batch_size,
@@ -34,29 +32,31 @@ def test(idx,model,reload=False):
         valid_X = Variable(valid_X, requires_grad=False).cuda()
 
         output_list = model(valid_X)
-
+        mae = 0
+        mse = 0
         for j in range(args.batch_size):
 
-            start_time = name_list[iteration*args.batch_size+j][args.seq_start-1]
-            time_list = [name_list[iteration*args.batch_size+j][i] for i in range(args.seq_start,args.seq_length)]
-            A = valid_X[j][-1].data.cpu().numpy().reshape(args.img_size,args.img_size)
-            A = (A+0.5).astype(np.uint8)
-            A = Image.fromarray(A)
-            path = args.img_dir+start_time.split("/")[-1]
-            A.save(path)
+            for i in range(args.seq_length):
+                targetY = valid_Y[j][i].data.cpu().numpy()
 
-            for k in range(args.seq_length-args.seq_start):
-                A = output_list[k][j,0,:,:].data.cpu().numpy().reshape(args.img_size,args.img_size)
-                A = (A+0.5).astype(np.uint8)
-                A = Image.fromarray(A)
-                path = args.img_dir+time_list[k][:-4].split("/")[-1]+"_{}.png".format(k)
-                A.save(path)
+                A = output_list[i][j,0,:,:].data.cpu().numpy()
+
+                gt_cnt = np.sum(targetY)
+                pre_cnt = np.sum(A)
+                mae += abs(np.sum(targetY) - np.sum(A))
+                mse += (np.sum(targetY) - np.sum(A)) ** 2
+
+                print('Gt cnt: %f, Pred cnt: %f' % (gt_cnt, pre_cnt))
+                
+#                 path = args.img_dir+str(iteration)+str(i)+str(j)+'.png'
+#                 A.save(path)
 
         output_list = None
 
 if __name__== "__main__":
+    torch.cuda.set_device(2)
 
-    test(42,None,reload=True)
+    test(7,None,reload=True)
 
 
 
