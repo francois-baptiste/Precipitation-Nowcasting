@@ -47,7 +47,7 @@ def run_training(args,reload=False):
         drop_last = True)
 
 #     criterion = nn.L1Loss()
-    criterion = nn.MSELoss(size_average=False)
+    criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(),lr=args.lr,weight_decay=args.wd)
     loss_ave = 0
 
@@ -65,9 +65,6 @@ def run_training(args,reload=False):
             X, Y = data
             X = Variable(X).cuda()
             Y = Variable(Y).cuda()
-            
-            mse = 0
-            mae = 0
 
             output_list = model(X)
             optimizer.zero_grad()         
@@ -83,7 +80,6 @@ def run_training(args,reload=False):
 #                 mse += (np.sum(targetY) - np.sum(A)) ** 2
 
 #                 print('Gt cnt: %f, Pred cnt: %f' % (gt_cnt, pre_cnt))
-                print(output_list[i].size(0))
                 target = Y[:,i,:,:]
                 loss += criterion(output_list[i].reshape(target.shape), target)
             
@@ -98,5 +94,5 @@ def run_training(args,reload=False):
     summary.close()
 
 if __name__=="__main__":
-    torch.cuda.set_device(2)
+    torch.cuda.set_device(3)
     run_training(args)

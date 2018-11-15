@@ -1,0 +1,81 @@
+Initiating new model
+size of the data:  793 793
+--------------------------------------------
+EPOCH: 0
+Epoch 0: 422.741028
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 1
+Epoch 1: 1.543843
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 2
+Epoch 2: 1.432282
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 3
+Epoch 3: 1.517656
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 4
+Epoch 4: 1.446011
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 5
+Epoch 5: 1.371487
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 6
+Epoch 6: 1.426242
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 7
+Epoch 7: 1.342291
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 8
+Epoch 8: 1.222406
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 9
+Epoch 9: 1.499802
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 10
+Epoch 10: 1.198183
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 11
+Epoch 11: 1.795410
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 12
+Epoch 12: 2.100929
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 13
+Epoch 13: 1.364967
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 14
+Epoch 14: 1.339545
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 15
+Epoch 15: 1.296515
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 16
+Epoch 16: 1.249945
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 17
+Epoch 17: 1.257108
+Finished an epoch.Saving the net....... 
+--------------------------------------------
+EPOCH: 18
+Reloading exsiting model
+model4_17.pkl
+size of the data:  793 793
+--------------------------------------------
+EPOCH: 0

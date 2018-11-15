@@ -159,10 +159,11 @@ class Ucsd_loader():
             gt_file = h5py.File(self.all_glist[index][i],'r')
             labeli = np.float32(np.asarray(gt_file['density']))
             labeli = Image.fromarray(labeli).resize((args.img_size,args.img_size),Image.BILINEAR)
+#             labeli = Image.fromarray(labeli)
             label.append(np.asarray(labeli))
             
 
-            datai = Image.open(self.all_dlist[index][i]).resize((args.img_size, args.img_size),Image.BILINEAR)
+            datai = Image.open(self.all_dlist[index][i]).resize((args.img_size,args.img_size),Image.BILINEAR)
             datai = np.asarray(datai)
             data.append(datai)
         

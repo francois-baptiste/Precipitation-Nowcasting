@@ -59,9 +59,8 @@ class ConvLSTM(nn.Module):
         cell2 = Variable(torch.zeros(state_size)).cuda()
         
         
-        for i in range(1, args.seq_length):
-                                                        
-            output[i] = self.conv(X_chunked[i])     
+        for i in range(0, args.seq_length):                                                       
+            output[i] = self.conv(X_chunked[i])
             output[i] = self.pool(output[i])
             hidden1, cell1 = self.convlstm1(output[i],(hidden1,cell1))
             hidden2, cell2 = self.convlstm2(hidden1,(hidden2,cell2))
