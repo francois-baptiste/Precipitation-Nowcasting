@@ -42,11 +42,11 @@ args.add_argument('--model_dir',
                   help = "dir where models are saved")
 args.add_argument('--trainset_name',
                   type = str,
-                  default = 'train',
+                  default = 'train_fixed',
                   help = "the training set where the training is conducted")
 args.add_argument('--testset_name',
                   type = str,
-                  default = 'test',
+                  default = 'test_fixed',
                   help = "the test set where the test is conducted")
 args.add_argument('--seq_length',
                   type = int,
@@ -158,12 +158,13 @@ class Ucsd_loader():
         for i in range(len(self.all_glist[index])):
             gt_file = h5py.File(self.all_glist[index][i],'r')
             labeli = np.float32(np.asarray(gt_file['density']))
-            labeli = Image.fromarray(labeli).resize((args.img_size,args.img_size),Image.BILINEAR)
-#             labeli = Image.fromarray(labeli)
+#             labeli = Image.fromarray(labeli).resize((args.img_size,args.img_size),Image.BILINEAR)
+            labeli = Image.fromarray(labeli)
             label.append(np.asarray(labeli))
             
 
-            datai = Image.open(self.all_dlist[index][i]).resize((args.img_size,args.img_size),Image.BILINEAR)
+#             datai = Image.open(self.all_dlist[index][i]).resize((args.img_size,args.img_size),Image.BILINEAR)
+            datai = Image.open(self.all_dlist[index][i])
             datai = np.asarray(datai)
             data.append(datai)
         

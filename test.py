@@ -1,11 +1,12 @@
 from util import *
 from training import *
 # from convlstm import CLSTM
- 
+import matplotlib.pyplot as plt
+
 def restore_net(idx):
 
     print("Reloading previous model")
-    net = torch.load(args.model_dir+"modelr_{0}.pkl".format(idx))
+    net = torch.load(args.model_dir+"model1_{0}.pkl".format(idx))
     return net
 
 
@@ -28,7 +29,11 @@ def test(idx,model,reload=False):
     total_mae = 0
     total_mse = 0
     step = 0
-
+    
+    # mask for ucsd
+    roi = np.loadtxt('data/ucsd_mask.txt')
+    roi /= 255
+    
     for iteration,valid_data in enumerate(trainloader,0):
         print(iteration)
         valid_X,valid_Y = valid_data
@@ -43,19 +48,21 @@ def test(idx,model,reload=False):
             for i in range(args.seq_length):
                 targetY = valid_Y[j][i].data.cpu().numpy()
 
-                A = output_list[i][j,0,:,:].data.cpu().numpy()
-                #A = 255*A/np.max(A)
-                #A = A.astype(np.uint8)
-                print(A[A > 0])
+                A = output_list[i][j,0,:,:].data.cpu().numpy() # only the first color channel 0
+#                 A = 255*A/np.max(A)
+#                 A = A.astype(np.uint8)
+#                 print(A)
+#                 A = A * roi
                 gt_cnt = np.sum(targetY)
                 pre_cnt = np.sum(A)
                 mae += abs(np.sum(targetY) - np.sum(A))
                 mse += (np.sum(targetY) - np.sum(A)) ** 2
 
-               # print('Gt cnt: %f, Pred cnt: %f' % (gt_cnt, pre_cnt))
-                A = Image.fromarray(A).convert("L")                
+                print('Gt cnt: %f, Pred cnt: %f' % (gt_cnt, pre_cnt))
+#                 A = Image.fromarray(A).convert("L")                
                 path = args.img_dir+str(iteration)+str(i)+str(j)+'.png'
-                A.save(path)
+#                 A.save(path)
+                plt.imsave(path, A)
                 step += 1
         total_mse += mse
         total_mae += mae
@@ -64,9 +71,9 @@ def test(idx,model,reload=False):
     print('total mae: ', total_mae/step)
 
 if __name__== "__main__":
-    torch.cuda.set_device(3)
+    torch.cuda.set_device(2)
 
-    test(37,None,reload=True)
+    test(55,None,reload=True)
 
 
 

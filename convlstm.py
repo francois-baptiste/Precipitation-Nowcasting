@@ -140,12 +140,8 @@ class CGRU_cell(nn.Module):
         gates = self.conv1(combined_1)
 
         zgate, rgate = torch.split(gates, self.num_features, dim=1)
-        del gates
-        del combined_1
         z = torch.sigmoid(zgate)
-        del zgate
         r = torch.sigmoid(rgate)
-        del rgate
 
         combined_2 = torch.cat((input, r*htprev), 1)
         ht = self.conv2(combined_2)
@@ -194,11 +190,13 @@ class CGRU(nn.Module):
         cell_list.append(CGRU_cell(self.shape, self.input_chans, self.filter_size, self.hidden_dim[0]).cuda())#the first
         #one has a different number of input channels
         
-        #self.conv = nn.Conv2d(in_channels=hidden_dim[-1], out_channels=1, kernel_size=1, stride=1, padding=0)    
+        self.conv = nn.Conv2d(in_channels=hidden_dim[-1], out_channels=1, kernel_size=1, stride=1, padding=0)    
         #self.relu = nn.ReLU(inplace=True)
         for idcell in range(1,self.num_layers):
             cell_list.append(CGRU_cell(self.shape, self.hidden_dim[idcell-1], self.filter_size, self.hidden_dim[idcell]).cuda())
         self.cell_list=nn.ModuleList(cell_list)      
+        
+        self.decoder = Decoder(self.shape, hidden_dim[-1], 1, 1)
 
     
     def forward(self, input, hidden_state):
@@ -209,7 +207,7 @@ class CGRU(nn.Module):
         """
 
         current_input = input.transpose(0, 1)#now is seq_len,B,C,H,W
-
+        next_hidden = [] # hidden state (h and c)
         seq_len=current_input.size(0)
         prediction = []
         for idlayer in range(self.num_layers):#loop for every layer
@@ -217,17 +215,18 @@ class CGRU(nn.Module):
             hidden_c=hidden_state[idlayer]#hidden and c are images with several channels
             output_inner = []            
             for t in range(seq_len):#loop for every sequence
-                hidden_c=self.cell_list[idlayer](current_input[t,...],hidden_c)#cell_list is a list with different conv_lstms 1 for every layer
-
+                #cell_list is a list with different conv_lstms 1 for every layer
+                hidden_c=self.cell_list[idlayer](current_input[t,...],hidden_c)
                 output_inner.append(hidden_c)
+            next_hidden.append(hidden_c)
             current_input = torch.cat(output_inner, 0).view(current_input.size(0), *output_inner[0].size())#seq_len,B,chans,H,W
         
-        prediction = []
-        for i in range(len(output_inner)):
-            pred_i = self.relu(self.conv(output_inner[i]))
-            #pred_i = self.relu(pred_i)
+#         print(next_hidden[-1].shape, ' : ', current_input.shape)
+        for i in range(len(current_input)):
+            pred_i = self.conv(current_input[i])
+#             pred_i = self.relu(pred_i)
             prediction.append(pred_i)
-        
+
         return prediction
 
     def init_hidden(self,batch_size):

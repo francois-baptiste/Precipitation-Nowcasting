@@ -12,18 +12,19 @@ from convlstm import CGRU
 import convlstm
 
 def run_training(args,reload=False):     
-
+    start = 0
     #Initialize model
     if reload:
         model_list = []
         print("Reloading exsiting model")
         maximum = 0
-        model_name = "model4_"+str(maximum)+".pkl"
+        model_name = "model1_"+str(maximum)+".pkl"
         for model_name in os.listdir(args.model_dir):
             num = int(model_name.split("_")[1][:-4])
             if num > maximum:
                 maximum = num
-        model_name = "model4_"+str(17)+".pkl"
+        maximum = 5
+        model_name = "model1_"+str(maximum)+".pkl"
         print(model_name)
         model = torch.load(args.model_dir+model_name)
         start = maximum+1
@@ -31,13 +32,13 @@ def run_training(args,reload=False):
     else:
         print('Initiating new model')
         
-        model = CGRU((args.img_size, args.img_size), 1, 5, (128, 64, 64, 64), 4)
+        model = CGRU((args.width_size, args.height_size), 1, 5, (128, 64, 64, 64), 4)
         model.apply(convlstm.weights_init)
         model = model.cuda()
         start = 0
 
     torch.manual_seed(1)
-    self_built_dataset = util.Ucsd_loader(args.data_dir+args.trainset_name, args.data_dir+'train_gt/',
+    self_built_dataset = util.Ucsd_loader(args.data_dir+args.trainset_name, args.data_dir+'train_fixed_gt/',
                                           args.seq_length)
     trainloader = DataLoader(
         self_built_dataset,
@@ -76,15 +77,24 @@ def run_training(args,reload=False):
                 loss += criterion(output, target)
             
             loss_ave += loss.data
+            
+            if iteration % 100 == 0:
+                print("iteration %d: %f" % (iteration, loss_ave))
             loss.backward()
             optimizer.step()
+            
+        print()
         print("Epoch %d: %f" % (epoch, loss_ave / step))
         loss_ave = 0
         print("Finished an epoch.Saving the net....... ")
-        torch.save(model,args.model_dir+"modelr_{0}.pkl".format(epoch))    
+        
+        if reload:
+            torch.save(model,args.model_dir+"model1_{0}.pkl".format(start+epoch))    
+        else:
+            torch.save(model,args.model_dir+"model1_{0}.pkl".format(epoch))    
 
     summary.close()
 
 if __name__=="__main__":
-    torch.cuda.set_device(3)
-    run_training(args, reload=False)
+    torch.cuda.set_device(2)
+    run_training(args, reload=True)
