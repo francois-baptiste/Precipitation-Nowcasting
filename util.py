@@ -44,6 +44,10 @@ args.add_argument('--trainset_name',
                   type = str,
                   default = 'train_fixed',
                   help = "the training set where the training is conducted")
+args.add_argument('--trainset_gt_name',
+                  type = str,
+                  default = 'train_fixed_gt',
+                  help = "the training set where the training is conducted")
 args.add_argument('--testset_name',
                   type = str,
                   default = 'test_fixed',

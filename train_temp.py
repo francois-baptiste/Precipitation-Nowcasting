@@ -38,7 +38,7 @@ def run_training(args,reload=False):
         start = 0
 
     torch.manual_seed(1)
-    self_built_dataset = util.Ucsd_loader(args.data_dir+args.trainset_name, args.data_dir+'train_fixed_gt/',
+    self_built_dataset = util.Ucsd_loader(args.data_dir+args.trainset_name, args.data_dir+args.trainset_gt_name,
                                           args.seq_length)
     trainloader = DataLoader(
         self_built_dataset,
