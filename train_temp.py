@@ -97,4 +97,4 @@ def run_training(args,reload=False):
 
 if __name__=="__main__":
     torch.cuda.set_device(2)
-    run_training(args, reload=True)
+    run_training(args, reload=args.reload)

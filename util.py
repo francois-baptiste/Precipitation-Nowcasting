@@ -23,7 +23,7 @@ import argparse
 
 
 args = argparse.ArgumentParser()
-
+args.add_argument('--reload', dest='reload', action='store_true')
 args.add_argument('--data_dir',
                   type = str,
                   default = './data/',
